@@ -6,6 +6,12 @@ const HoldsService = require('./holds-service')
 const holdsRouter = express.Router()
 const jsonParser = express.json()
 
+const serializeHoldDate = hold => ({
+  id: xss(hold.id),
+  hold_date: xss(hold.hold_date)
+})
+
+
 const serializeHold = hold => ({
     id: xss(hold.id),
     hold_date: xss(hold.hold_date),
@@ -66,6 +72,16 @@ const serializeHold = hold => ({
     hold_number: xss(hold.hold_number)
 })
 
+holdsRouter
+  .route('/holds/dates')
+  .get((req, res, next) => {
+    const knexInstance = req.app.get('db')
+    HoldsService.getAllHolds(knexInstance)
+      .then(holds => {
+        res.json(holds.map(serializeHoldDate))
+      })
+      .catch(next)
+  })
 holdsRouter
   .route('/holds')
   .get((req, res, next) => {
